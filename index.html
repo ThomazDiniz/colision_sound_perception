@@ -27,6 +27,7 @@
       justify-content: center;
       flex-direction: column;
       z-index: 100;
+      text-align: center;
     }
     #startScreen button {
       font-size: 24px;
@@ -48,7 +49,7 @@
 <body>
 
 <div id="startScreen">
-  <h1>Carregando...</h1>
+  <h1>Carregando som...</h1>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -89,10 +90,9 @@
     ball2.x += ball2.vx;
 
     if (Math.abs(ball1.x - ball2.x) < 2 && playSound && !soundPlayed) {
-      // Clona o áudio para evitar conflito de múltiplos play()
       const soundInstance = baseSound.cloneNode();
       soundInstance.play().catch(err => {
-        console.warn("Erro ao tocar som:", err);
+        console.error("Erro ao tocar som:", err);
       });
       soundPlayed = true;
     }
@@ -114,18 +114,40 @@
     update();
   }
 
-  // Espera o áudio estar carregado
+  function showError(message) {
+    const startScreen = document.getElementById("startScreen");
+    startScreen.innerHTML = `
+      <h1 style="color: red;">Erro ao carregar áudio</h1>
+      <p>${message}</p>
+      <p>Verifique se o arquivo <code>bosu05.wav</code> está na mesma pasta que o <code>index.html</code></p>
+    `;
+  }
+
+  // Garante que o som carregou com sucesso
   baseSound.addEventListener("canplaythrough", () => {
     const startScreen = document.getElementById("startScreen");
     startScreen.innerHTML = `<h1>Clique para iniciar</h1><button id="startButton">Iniciar</button>`;
 
     document.getElementById("startButton").onclick = () => {
-      baseSound.play().then(() => baseSound.pause()).catch(() => {}); // Desbloqueia o som
-      startScreen.remove();
-      initAnimation();
+      baseSound.play().then(() => {
+        baseSound.pause();
+        baseSound.currentTime = 0;
+        startScreen.remove();
+        initAnimation();
+      }).catch(err => {
+        showError("O navegador bloqueou o som ou a reprodução falhou: " + err.message);
+      });
     };
   });
 
+  // Timeout: se o som não carregar em 5 segundos, mostra erro
+  setTimeout(() => {
+    if (!baseSound.readyState || baseSound.readyState < 3) {
+      showError("O som não pôde ser carregado. Verifique se o arquivo está disponível e se o navegador permite áudio.");
+    }
+  }, 5000);
+
+  // Botão de som
   document.getElementById("toggleSound").onclick = () => {
     playSound = !playSound;
     document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
