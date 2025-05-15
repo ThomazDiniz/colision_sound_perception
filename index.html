@@ -30,58 +30,63 @@
 
 <script>
   const canvas = document.getElementById("canvas");
-  const ctx = canvas.getContext("2d");
+const ctx = canvas.getContext("2d");
 
-  // Tela cheia
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
+canvas.width = window.innerWidth;
+canvas.height = window.innerHeight;
 
-  const radius = 100;
-  const centerY = canvas.height / 2;
+const radius = 100;
+const centerY = canvas.height / 2;
 
-  let ball1 = { x: radius + 100, y: centerY, vx: 5 };
-  let ball2 = { x: canvas.width - radius - 100, y: centerY, vx: -5 };
-  let playSound = false;
+let ball1 = { x: radius + 100, y: centerY, vx: 5 };
+let ball2 = { x: canvas.width - radius - 100, y: centerY, vx: -5 };
+let playSound = false;
+let soundPlayed = false;
 
-  const sound = new Audio("./bosu05.wav");
+const sound = new Audio("./bosu05.wav"); // use seu arquivo local
+sound.preload = "auto";
+sound.load(); // garante que começa o carregamento
 
-  document.getElementById("toggleSound").onclick = () => {
-    playSound = !playSound;
-    document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
-  };
+document.getElementById("toggleSound").onclick = () => {
+  playSound = !playSound;
+  document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
+};
 
-  function drawBall(x, y) {
-    ctx.beginPath();
-    ctx.arc(x, y, radius, 0, Math.PI * 2);
-    ctx.fillStyle = "#fff";
-    ctx.fill();
+function drawBall(x, y) {
+  ctx.beginPath();
+  ctx.arc(x, y, radius, 0, Math.PI * 2);
+  ctx.fillStyle = "#fff";
+  ctx.fill();
+}
+
+function update() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+  drawBall(ball1.x, ball1.y);
+  drawBall(ball2.x, ball2.y);
+
+  ball1.x += ball1.vx;
+  ball2.x += ball2.vx;
+
+  // se as bolas estão próximas E som ainda não foi tocado
+  if (Math.abs(ball1.x - ball2.x) < 2 && playSound && !soundPlayed) {
+    sound.currentTime = 0;
+    sound.play().catch((err) => console.warn("Falha ao tocar som:", err));
+    soundPlayed = true;
   }
 
-  function update() {
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    drawBall(ball1.x, ball1.y);
-    drawBall(ball2.x, ball2.y);
-
-    ball1.x += ball1.vx;
-    ball2.x += ball2.vx;
-
-    // Colisão simulada
-    if (Math.abs(ball1.x - ball2.x) < 2 && playSound) {
-      sound.currentTime = 0;
-      sound.play();
-    }
-
-    // Reset
-    if (ball1.x > canvas.width + radius || ball2.x < -radius) {
-      ball1.x = radius + 100;
-      ball2.x = canvas.width - radius - 100;
-    }
-
-    requestAnimationFrame(update);
+  // reset de ciclo
+  if (ball1.x > canvas.width + radius || ball2.x < -radius) {
+    ball1.x = radius + 100;
+    ball2.x = canvas.width - radius - 100;
+    soundPlayed = false; // habilita tocar de novo no próximo cruzamento
   }
 
-  update();
+  requestAnimationFrame(update);
+}
+
+update();
+
 </script>
 </body>
 </html>
