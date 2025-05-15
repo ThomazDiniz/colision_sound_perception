@@ -48,8 +48,7 @@
 <body>
 
 <div id="startScreen">
-  <h1>Clique para Iniciar</h1>
-  <button id="startButton">Iniciar Apresentação</button>
+  <h1>Carregando...</h1>
 </div>
 
 <canvas id="canvas"></canvas>
@@ -58,46 +57,19 @@
 <script>
   const canvas = document.getElementById("canvas");
   const ctx = canvas.getContext("2d");
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
 
   const radius = 100;
-  let centerY;
+  const centerY = canvas.height / 2;
+
   let ball1, ball2;
   let playSound = false;
   let soundPlayed = false;
   let animationStarted = false;
 
-  const sound = new Audio("./bosu05.wav");
-  sound.preload = "auto";
-
-  function init() {
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
-    centerY = canvas.height / 2;
-
-    ball1 = { x: radius + 100, y: centerY, vx: 5 };
-    ball2 = { x: canvas.width - radius - 100, y: centerY, vx: -5 };
-
-    document.getElementById("toggleSound").style.display = "block";
-    animationStarted = true;
-    update();
-  }
-
-  document.getElementById("startButton").onclick = () => {
-    sound.play().then(() => {
-      sound.pause();  // Desbloqueia o áudio
-      sound.currentTime = 0;
-    }).catch(err => {
-      console.warn("Desbloqueio de áudio falhou:", err);
-    });
-
-    document.getElementById("startScreen").style.display = "none";
-    init();
-  };
-
-  document.getElementById("toggleSound").onclick = () => {
-    playSound = !playSound;
-    document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
-  };
+  const baseSound = new Audio("./bosu05.wav");
+  baseSound.preload = "auto";
 
   function drawBall(x, y) {
     ctx.beginPath();
@@ -110,7 +82,6 @@
     if (!animationStarted) return;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
-
     drawBall(ball1.x, ball1.y);
     drawBall(ball2.x, ball2.y);
 
@@ -118,8 +89,9 @@
     ball2.x += ball2.vx;
 
     if (Math.abs(ball1.x - ball2.x) < 2 && playSound && !soundPlayed) {
-      sound.currentTime = 0;
-      sound.play().catch(err => {
+      // Clona o áudio para evitar conflito de múltiplos play()
+      const soundInstance = baseSound.cloneNode();
+      soundInstance.play().catch(err => {
         console.warn("Erro ao tocar som:", err);
       });
       soundPlayed = true;
@@ -133,6 +105,31 @@
 
     requestAnimationFrame(update);
   }
+
+  function initAnimation() {
+    ball1 = { x: radius + 100, y: centerY, vx: 5 };
+    ball2 = { x: canvas.width - radius - 100, y: centerY, vx: -5 };
+    animationStarted = true;
+    document.getElementById("toggleSound").style.display = "block";
+    update();
+  }
+
+  // Espera o áudio estar carregado
+  baseSound.addEventListener("canplaythrough", () => {
+    const startScreen = document.getElementById("startScreen");
+    startScreen.innerHTML = `<h1>Clique para iniciar</h1><button id="startButton">Iniciar</button>`;
+
+    document.getElementById("startButton").onclick = () => {
+      baseSound.play().then(() => baseSound.pause()).catch(() => {}); // Desbloqueia o som
+      startScreen.remove();
+      initAnimation();
+    };
+  });
+
+  document.getElementById("toggleSound").onclick = () => {
+    playSound = !playSound;
+    document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
+  };
 </script>
 </body>
 </html>
