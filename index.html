@@ -119,35 +119,41 @@
     startScreen.innerHTML = `
       <h1 style="color: red;">Erro ao carregar áudio</h1>
       <p>${message}</p>
-      <p>Verifique se o arquivo <code>bosu05.wav</code> está na mesma pasta que o <code>index.html</code></p>
+      <p>Verifique se o arquivo <code>bosu05.wav</code> está na mesma pasta que o <code>index.html</code>.</p>
     `;
   }
 
-  // Garante que o som carregou com sucesso
+  // Espera o som carregar corretamente
   baseSound.addEventListener("canplaythrough", () => {
     const startScreen = document.getElementById("startScreen");
-    startScreen.innerHTML = `<h1>Clique para iniciar</h1><button id="startButton">Iniciar</button>`;
+    startScreen.innerHTML = `
+      <h1>Clique para iniciar</h1>
+      <button id="startButton">Iniciar</button>
+    `;
 
-    document.getElementById("startButton").onclick = () => {
-      baseSound.play().then(() => {
+    document.getElementById("startButton").onclick = async () => {
+      try {
+        baseSound.muted = true;
+        await baseSound.play();  // desbloqueia
         baseSound.pause();
+        baseSound.muted = false;
         baseSound.currentTime = 0;
-        startScreen.remove();
+
+        document.getElementById("startScreen").remove();
         initAnimation();
-      }).catch(err => {
-        showError("O navegador bloqueou o som ou a reprodução falhou: " + err.message);
-      });
+      } catch (err) {
+        showError("Erro ao desbloquear som: " + err.message);
+      }
     };
   });
 
-  // Timeout: se o som não carregar em 5 segundos, mostra erro
+  // Se após 5 segundos o som não carregou, dá erro
   setTimeout(() => {
     if (!baseSound.readyState || baseSound.readyState < 3) {
-      showError("O som não pôde ser carregado. Verifique se o arquivo está disponível e se o navegador permite áudio.");
+      showError("O som não pôde ser carregado. Verifique se o arquivo está disponível, nome está correto e navegador permite áudio.");
     }
   }, 5000);
 
-  // Botão de som
   document.getElementById("toggleSound").onclick = () => {
     playSound = !playSound;
     document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
