@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Apresentação - Colisão com som</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+      background: black;
+    }
+    canvas {
+      display: block;
+    }
+    button {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      z-index: 10;
+      font-size: 20px;
+      padding: 10px 20px;
+    }
+  </style>
+</head>
+<body>
+
+<canvas id="canvas"></canvas>
+<button id="toggleSound">Alternar som: OFF</button>
+
+<script>
+  const canvas = document.getElementById("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // Tela cheia
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+
+  const radius = 100;
+  const centerY = canvas.height / 2;
+
+  let ball1 = { x: radius + 100, y: centerY, vx: 5 };
+  let ball2 = { x: canvas.width - radius - 100, y: centerY, vx: -5 };
+  let playSound = false;
+
+  const sound = new Audio("./bosu05.wav");
+
+  document.getElementById("toggleSound").onclick = () => {
+    playSound = !playSound;
+    document.getElementById("toggleSound").textContent = `Alternar som: ${playSound ? "ON" : "OFF"}`;
+  };
+
+  function drawBall(x, y) {
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.fillStyle = "#fff";
+    ctx.fill();
+  }
+
+  function update() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    drawBall(ball1.x, ball1.y);
+    drawBall(ball2.x, ball2.y);
+
+    ball1.x += ball1.vx;
+    ball2.x += ball2.vx;
+
+    // Colisão simulada
+    if (Math.abs(ball1.x - ball2.x) < 2 && playSound) {
+      sound.currentTime = 0;
+      sound.play();
+    }
+
+    // Reset
+    if (ball1.x > canvas.width + radius || ball2.x < -radius) {
+      ball1.x = radius + 100;
+      ball2.x = canvas.width - radius - 100;
+    }
+
+    requestAnimationFrame(update);
+  }
+
+  update();
+</script>
+</body>
+</html>
