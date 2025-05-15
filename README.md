@@ -2,6 +2,8 @@
 
 Este projeto demonstra como a **percepção sensorial** pode ser influenciada por **feedback sonoro**, mesmo quando **não há uma colisão física visível**. É inspirado pela palestra ["Juice It or Lose It"](https://www.youtube.com/watch?v=Fy0aCDmgnxg), que discute *game feel* e elementos de reforço audiovisual em jogos.
 
+Este trabalho é um pequeno pedaço de uma apresentação da Disciplina de "Metodologia do Ensino Superior" para a Universidade Federal de Campina Grande.
+
 ---
 
 ## 🧠 Conceito
@@ -19,7 +21,9 @@ Esse exemplo mostra como **som + tempo** = **feedback poderoso**, um conceito ch
 3. Abra o `index.html` no navegador
 4. Clique no botão **"Alternar som"** para ativar o som da colisão
 
-> Dica: pressione `F11` para colocar o navegador em **modo apresentação/tela cheia**
+ou 
+
+acesse `https://thomazdiniz.github.io/colision_sound_perception/`
 
 ---
 
