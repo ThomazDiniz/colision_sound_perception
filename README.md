@@ -23,6 +23,6 @@ Esse exemplo mostra como **som + tempo** = **feedback poderoso**, um conceito ch
 
 ou 
 
-acesse `https://thomazdiniz.github.io/colision_sound_perception/`
+acesse [https://thomazdiniz.github.io/colision_sound_perception/](https://thomazdiniz.github.io/colision_sound_perception/)
 
 ---
